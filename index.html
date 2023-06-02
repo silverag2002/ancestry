@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ancestry</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>  
+    <style>
+      rect{
+        width:120px;
+        height:40px;
+        stroke:gray;
+        fill:white;
+        stroke-width: 2;
+      }
+      text
+        {
+            dominant-baseline:middle;
+            text-anchor: middle;
+        }
+      .bigger{
+        font-size: 20px;
+      }
+
+      path{
+        fill:none;
+        stroke-width: 2;
+        stroke:gray
+      }
+    </style>
+</head>
+<body>
+    
+    <script>
+       var svg=d3.select("body").append("svg").attr("width",1000).attr("height",500).append("g").attr("transform","translate(100,100)")
+
+       var data=[
+        {"child":"X","parent":"Dad"},
+          {"child":"X","parent":"Mom"},
+          {"child":"Ankit","parent":"Dad"},
+                  {"child":"Ankit","parent":"Mom"}, 
+            {"child":"Dad","parent":"Dad's Dad"},
+              {"child":"Dad","parent":"Dad's Mom"},
+                {"child":"Mom","parent":"Mom's Mom"},
+                  {"child":"Mom","parent":"Mom's Dad"},
+                  {"child":null,"parent":"X"},
+                
+                 
+                  {"child":null,"parent":"Ankit"},
+       ]
+       var treeHeight=300;
+       var treeWidth=600;
+       var dataStructure=d3.stratify().id(function(d){return d.parent;}).parentId(function(d){return d.child})(data);
+       var treeStructure=d3.tree()
+       .separation(function(a,b){
+        return a.parent==b.parent ?5:4
+       })
+       .size([treeWidth,treeHeight]);
+       var information=treeStructure(dataStructure)
+       var connections=svg.append("g").selectAll("path").data(information.links());
+
+connections.enter().append("path").attr("d",function(d){return "M" + (d.source.x+60)+","+(treeHeight-d.source.y)+"v" +(d.source.y-d.target.y+20) +"H"+(d.target.x)})
+      
+
+       var rectangles=svg.append("g").selectAll("rect").data(information.descendants());
+       rectangles.enter().append("rect").attr("x",function(d){return d.x}).attr("y",function(d){return (treeHeight-d.y)})
+
+       var names=svg.append("g").selectAll("text").data(information.descendants());
+       names.enter().append("text").text(function(d){return d.data.parent;}).attr("x",function(d){return (d.x+60)}).attr("y",function(d){return (treeHeight+20-d.y)})
+       .classed("bigger",true)
+
+      
+    </script>
+</body>
+</html>
